@@ -3,7 +3,6 @@ import { Upload, FileText, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { toast } from "sonner";
 
 interface PDFUploadProps {
   onFileUpload: (file: File) => void;
