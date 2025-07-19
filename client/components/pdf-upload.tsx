@@ -68,7 +68,7 @@ export function PDFUpload({ onFileUpload, uploadedFile, onRemoveFile }: PDFUploa
 
   return (
     <Card
-      className={`p-8 mb-6 border-2 border-dashed transition-colors cursor-pointer ${
+      className={` bg-card p-8 mb-6 border-2 border-dashed transition-colors cursor-pointer ${
         isDragOver
           ? "border-primary bg-primary/5"
           : "border-border hover:border-primary/50"

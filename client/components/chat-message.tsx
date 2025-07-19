@@ -1,6 +1,6 @@
 import { User, Bot } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Message, Doc } from "@/types";
+import { Message } from "@/types";
 
 interface ChatMessageProps {
   message: Message;
@@ -47,7 +47,7 @@ export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) 
         {isUser ? (
           <p className="text-sm leading-relaxed">{message.content}</p>
         ) : (
-          <div className="relative">
+          <div className="flex flex-wrap gap-1">
             <div
               className="text-sm leading-relaxed prose prose-sm max-w-none"
               dangerouslySetInnerHTML={{
@@ -55,14 +55,11 @@ export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) 
               }}
             />
             {isStreaming && (
-              <div className="flex items-center gap-2 mt-2">
-                <span className="inline-block w-0.25 h-4 ml-1 bg-primary streaming-cursor" />
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  </div>
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1">
+                  <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 </div>
               </div>
             )}
@@ -71,7 +68,7 @@ export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) 
 
         {/* referenced resources */}
         {message.documents && message.documents.length > 0 && (
-          <div className="mt-3 p-2 bg-muted/20 rounded-md border-l-2 border-primary/30">
+          <div className="mt-1 p-2 bg-muted/20 rounded-md border-l-2 border-primary/30">
             <p className="text-xs font-medium text-muted-foreground mb-1">
               📄 Referenced sources:
             </p>

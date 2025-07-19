@@ -28,22 +28,22 @@ export function ChatInput({ onSendMessage, disabled }: ChatInputProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2">
+    <form onSubmit={handleSubmit} className="flex items-center gap-2">
       <Textarea
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={disabled ? "Upload a PDF to start chatting..." : "Ask a question about your PDF..."}
         disabled={disabled}
-        className="min-h-[60px] resize-none"
+        className="min-h-[30px] resize-none"
         rows={2}
       />
       <Button
         type="submit"
         disabled={!message.trim() || disabled}
-        className="self-end"
+        className="self-end bg-secondary-foreground hover:bg-secondary-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <Send className="h-4 w-4" />
+        <Send className="h-5 w-5" />
       </Button>
     </form>
   );
