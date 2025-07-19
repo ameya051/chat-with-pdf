@@ -10,9 +10,10 @@ interface ChatInterfaceProps {
   isLoading: boolean;
   uploadedFile: File | null;
   onSendMessage: (content: string) => void;
+  streamingMessageId?: string;
 }
 
-export function ChatInterface({ messages, isLoading, uploadedFile, onSendMessage }: ChatInterfaceProps) {
+export function ChatInterface({ messages, isLoading, uploadedFile, onSendMessage, streamingMessageId }: ChatInterfaceProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -46,22 +47,12 @@ export function ChatInterface({ messages, isLoading, uploadedFile, onSendMessage
         ) : (
           <>
             {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
+              <ChatMessage
+                key={message.id}
+                message={message}
+                isStreaming={streamingMessageId === message.id && isLoading}
+              />
             ))}
-            {isLoading && (
-              <div className="flex gap-3 mb-4">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                  <Bot className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <Card className="max-w-[80%] p-3 bg-card">
-                  <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  </div>
-                </Card>
-              </div>
-            )}
             <div ref={messagesEndRef} />
           </>
         )}

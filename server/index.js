@@ -53,6 +53,7 @@ app.post('/upload/pdf', upload.single('pdf'), async (req, res) => {
 
 app.get('/chat', async (req, res) => {
   const userQuery = req.query.message;
+  const stream = req.query.stream === 'true';
 
   const embeddings = new GoogleGenerativeAIEmbeddings({
     model: 'text-embedding-004',
@@ -76,18 +77,59 @@ app.get('/chat', async (req, res) => {
   ${JSON.stringify(result)}
   `;
 
-  const chatResult = await client.chat.completions.create({
-    model: 'gemini-1.5-flash',
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: userQuery },
-    ],
-  });
+  if (stream) {
+    // Set headers for Server-Sent Events
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Cache-Control',
+    });
 
-  return res.json({
-    message: chatResult.choices[0].message.content,
-    docs: result,
-  });
+    try {
+      // Send initial data with documents
+      res.write(`data: ${JSON.stringify({ type: 'docs', docs: result })}\n\n`);
+
+      const stream = await client.chat.completions.create({
+        model: 'gemini-1.5-flash',
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: userQuery },
+        ],
+        stream: true,
+      });
+
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content;
+        if (content) {
+          res.write(`data: ${JSON.stringify({ type: 'content', content })}\n\n`);
+        }
+      }
+
+      // Send end signal
+      res.write(`data: ${JSON.stringify({ type: 'end' })}\n\n`);
+      res.end();
+    } catch (error) {
+      console.error('Streaming error:', error);
+      res.write(`data: ${JSON.stringify({ type: 'error', error: 'Failed to generate response' })}\n\n`);
+      res.end();
+    }
+  } else {
+    // Non-streaming response (backward compatibility)
+    const chatResult = await client.chat.completions.create({
+      model: 'gemini-1.5-flash',
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: userQuery },
+      ],
+    });
+
+    return res.json({
+      message: chatResult.choices[0].message.content,
+      docs: result,
+    });
+  }
 });
 
 app.listen(8000, () => console.log(`Server started on PORT:${8000}`));

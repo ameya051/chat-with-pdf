@@ -6,11 +6,19 @@ import { DocumentInfo } from "@/components/document-info";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Message } from "@/types";
+import { useStreamingChat } from "@/hooks/useStreamingChat";
 
 export default function Home() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [streamingMessageId, setStreamingMessageId] = useState<string | undefined>();
+
+  const { sendStreamingMessage } = useStreamingChat({
+    onMessageUpdate: setMessages,
+    setIsLoading,
+    onStreamingMessageIdChange: setStreamingMessageId,
+  });
 
   const handleFileUpload = async (file: File) => {
     try {
@@ -44,36 +52,7 @@ export default function Home() {
 
   const handleSendMessage = async (content: string) => {
     if (!uploadedFile) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content,
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setIsLoading(true);
-
-    try {
-      const res = await fetch(`http://localhost:8000/chat?message=${content}`);
-      const data = await res.json();
-
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: data?.message,
-        documents: data?.docs,
-        timestamp: new Date(),
-      };
-
-      setMessages(prev => [...prev, aiMessage]);
-    } catch (error) {
-      toast.error('Failed to send message. Please try again.');
-      console.error('Chat error:', error);
-    } finally {
-      setIsLoading(false);
-    }
+    await sendStreamingMessage(content, messages);
   };
   return (
     <div className="min-h-screen bg-background">
@@ -95,6 +74,7 @@ export default function Home() {
               isLoading={isLoading}
               uploadedFile={uploadedFile}
               onSendMessage={handleSendMessage}
+              streamingMessageId={streamingMessageId}
             />
           </div>
         )}
